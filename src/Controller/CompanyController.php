@@ -6,12 +6,14 @@ use App\Entity\Company;
 use App\Entity\Slot;
 use App\Form\CompanyType;
 use App\Repository\CompanyRepository;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
+ * @IsGranted("ROLE_USER")
  * @Route("/company")
  */
 class CompanyController extends AbstractController
@@ -80,6 +82,8 @@ class CompanyController extends AbstractController
      */
     public function edit(Request $request, Company $company): Response
     {
+        $this->denyAccessUnlessGranted("ROLE_ADMIN");
+
         $form = $this->createForm(CompanyType::class, $company);
         $form->handleRequest($request);
 
@@ -100,6 +104,8 @@ class CompanyController extends AbstractController
      */
     public function delete(Request $request, Company $company): Response
     {
+        $this->denyAccessUnlessGranted("ROLE_ADMIN");
+
         if ($this->isCsrfTokenValid('delete'.$company->getId(), $request->request->get('_token'))) {
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->remove($company);
