@@ -29,6 +29,11 @@ class Company
     private $description;
 
     /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $url;
+
+    /**
      * @ORM\OneToMany(targetEntity="App\Entity\Slot", mappedBy="company", orphanRemoval=true)
      */
     private $slots;
@@ -63,6 +68,18 @@ class Company
     public function setDescription(?string $description): self
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->url;
+    }
+
+    public function setUrl(?string $url): self
+    {
+        $this->url = $url;
 
         return $this;
     }
