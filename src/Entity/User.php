@@ -2,9 +2,11 @@
 
 namespace App\Entity;
 
+use Cassandra\ExecutionOptions;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use PhpParser\Node\Scalar\String_;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -43,9 +45,21 @@ class User implements UserInterface
     private $name;
 
     /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Training")
+     * @ORM\JoinColumn(name="training_id", referencedColumnName="id")
+     */
+    private $training;
+
+    /**
      * @ORM\OneToMany(targetEntity="App\Entity\Slot", mappedBy="student")
      */
     private $slots;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Training", inversedBy="users")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $trainning;
 
     public function __construct()
     {
@@ -142,6 +156,18 @@ class User implements UserInterface
         return $this;
     }
 
+    public function getTraining(): ?Training
+    {
+        return $this->training;
+    }
+
+    public function setTraining(Training $training): self
+    {
+        $this->training = $training;
+
+        return $this;
+    }
+
     /**
      * @return Collection|Slot[]
      */
@@ -169,6 +195,18 @@ class User implements UserInterface
                 $slot->setStudent(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getTrainning(): ?Training
+    {
+        return $this->trainning;
+    }
+
+    public function setTrainning(?Training $trainning): self
+    {
+        $this->trainning = $trainning;
 
         return $this;
     }
