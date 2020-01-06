@@ -55,12 +55,6 @@ class User implements UserInterface
      */
     private $slots;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Training", inversedBy="users")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $trainning;
-
     public function __construct()
     {
         $this->slots = new ArrayCollection();
@@ -195,19 +189,6 @@ class User implements UserInterface
                 $slot->setStudent(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getTrainning(): ?Training
-    {
-        return $this->trainning;
-    }
-
-    public function setTrainning(?Training $trainning): self
-    {
-        $this->trainning = $trainning;
-
         return $this;
     }
 }
