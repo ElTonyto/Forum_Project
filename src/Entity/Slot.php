@@ -22,7 +22,7 @@ class Slot
     private $time;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Company", inversedBy="slots")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Company", inversedBy="slots",  cascade={"persist"}))
      * @ORM\JoinColumn(nullable=false)
      */
     private $company;

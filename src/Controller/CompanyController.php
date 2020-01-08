@@ -41,6 +41,42 @@ class CompanyController extends AbstractController
         $slotsDuration = getenv('SLOTS_DURATION');
 
         // TODO: Générer les créneaux libres et les associer aux entreprises
+
+        $slotsStartSecond = $this->convertToSecond($slotsStart);
+        $slotsEndSecond = $this->convertToSecond($slotsEnd);
+        $slotsDurationSecond = $slotsDuration * 60;
+        $slotsQuantity = ( $slotsEndSecond - $slotsStartSecond ) / $slotsDurationSecond;
+
+        for ($i = 0; $i < $slotsQuantity; $i++) {
+            $slot = new Slot();
+           
+            $slot->setTime( $this->convertToString($slotsStartSecond) );
+            $company->addSlot($slot);
+
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($slot);
+            $entityManager->flush();
+
+            $slotsStartSecond += $slotsDurationSecond; 
+        }
+    }
+
+    // Converts seconds to HH:MM format
+    public function convertToString($seconds) {
+        $hours = floor($seconds / 3600);
+        $minutes = floor(($seconds / 60) % 60);
+
+        if( $minutes === 0){
+            return "$hours:$minutes"."0";
+        }
+        return "$hours:$minutes";
+        
+    }
+
+    // Convert string format HH:MM to seconds
+    public function convertToSecond($time){
+        list($h, $m) = explode(':', $time);
+	    return ($h * 3600) + ($m * 60);
     }
 
     /**

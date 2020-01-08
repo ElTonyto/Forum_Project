@@ -84,6 +84,8 @@ class Company
         return $this;
     }
 
+    
+
     /**
      * @return Collection|Slot[]
      */
