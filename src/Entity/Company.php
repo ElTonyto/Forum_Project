@@ -38,9 +38,16 @@ class Company
      */
     private $slots;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Training", inversedBy="companies")
+     */
+    private $trainings;
+
+
     public function __construct()
     {
         $this->slots = new ArrayCollection();
+        $this->trainings = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -112,6 +119,32 @@ class Company
             if ($slot->getCompany() === $this) {
                 $slot->setCompany(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Training[]
+     */
+    public function getTraining(): Collection
+    {
+        return $this->trainings;
+    }
+
+    public function addTraining(Training $training): self
+    {
+        if (!$this->trainings->contains($training)) {
+            $this->trainings[] = $training;
+        }
+
+        return $this;
+    }
+
+    public function removeTraining(Training $training): self
+    {
+        if ($this->trainings->contains($training)) {
+            $this->trainings->removeElement($training);
         }
 
         return $this;

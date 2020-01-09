@@ -28,9 +28,16 @@ class Training
      */
     private $users;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Company", mappedBy="trainings")
+     */
+    private $companies;
+
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
+        $this->companies = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -76,6 +83,34 @@ class Training
             if ($user->getTrainning() === $this) {
                 $user->setTrainning(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Company[]
+     */
+    public function getCompanies(): Collection
+    {
+        return $this->companies;
+    }
+
+    public function addCompany(Company $company): self
+    {
+        if (!$this->companies->contains($company)) {
+            $this->companies[] = $company;
+            $company->addTraining($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCompany(Company $company): self
+    {
+        if ($this->companies->contains($company)) {
+            $this->companies->removeElement($company);
+            $company->removeTraining($this);
         }
 
         return $this;

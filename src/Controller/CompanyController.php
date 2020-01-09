@@ -4,13 +4,18 @@ namespace App\Controller;
 
 use App\Entity\Company;
 use App\Entity\Slot;
+use App\Entity\Training;
 use App\Form\CompanyType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+
 use App\Repository\CompanyRepository;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
 /**
  * @IsGranted("ROLE_USER")
@@ -51,6 +56,7 @@ class CompanyController extends AbstractController
             $slot = new Slot();
            
             $slot->setTime( $this->convertToString($slotsStartSecond) );
+            
             $company->addSlot($slot);
 
             $entityManager = $this->getDoctrine()->getManager();
@@ -85,7 +91,13 @@ class CompanyController extends AbstractController
     public function new(Request $request): Response
     {
         $company = new Company();
+        $trainingOptions = $this->getTrainingsOptions();
+
         $form = $this->createForm(CompanyType::class, $company);
+
+        
+        $this->buildTrainingForm($trainingOptions, $form);
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -101,6 +113,27 @@ class CompanyController extends AbstractController
             'company' => $company,
             'form' => $form->createView(),
         ]);
+    }
+
+    public function buildTrainingForm ( ArrayCollection $options, $form ) {
+        $form->add('training', EntityType::class, [
+            'class' => Training::class,
+            'choice_label' => 'name',
+            'choices' => $options,
+            'multiple' => true,
+            'expanded' => true
+        ]);
+    }
+// voir ArticleController (getProviderOptionForm && createProviderFormField)
+    public function getTrainingsOptions(){
+        $entityManager = $this->getDoctrine()->getManager();
+        $trainings = $entityManager->getRepository(Training::class)->findAll();
+
+        $options = new ArrayCollection();
+        foreach($trainings as $training){
+            $options->set($training->getName(), $training);
+        }
+        return $options;
     }
 
     /**
