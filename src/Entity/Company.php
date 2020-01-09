@@ -137,7 +137,6 @@ class Company
         if (!$this->trainings->contains($training)) {
             $this->trainings[] = $training;
         }
-
         return $this;
     }
 
@@ -146,7 +145,6 @@ class Company
         if ($this->trainings->contains($training)) {
             $this->trainings->removeElement($training);
         }
-
         return $this;
     }
 }

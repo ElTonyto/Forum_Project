@@ -115,6 +115,7 @@ class CompanyController extends AbstractController
         ]);
     }
 
+    // Generates the training checkboxes for the form
     public function buildTrainingForm ( ArrayCollection $options, $form ) {
         $form->add('training', EntityType::class, [
             'class' => Training::class,
@@ -124,11 +125,15 @@ class CompanyController extends AbstractController
             'expanded' => true
         ]);
     }
-// voir ArticleController (getProviderOptionForm && createProviderFormField)
+
+    // Gets all the training options
     public function getTrainingsOptions(){
+
+        // Picks all the elements in Training
         $entityManager = $this->getDoctrine()->getManager();
         $trainings = $entityManager->getRepository(Training::class)->findAll();
 
+        // Add it to options
         $options = new ArrayCollection();
         foreach($trainings as $training){
             $options->set($training->getName(), $training);
