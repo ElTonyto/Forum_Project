@@ -14,7 +14,10 @@
             </tr>
         </thead>
         <tbody>
+
         {% for company in companies %}
+
+            {% if app.user.training in company.trainings %}
             <tr>
                 <td>{{ company.name }}</td>
                 <td>
@@ -25,11 +28,24 @@
                     <a href="{{ path('company_edit', {'id': company.id}) }}">éditer</a>
                 </td>
             </tr>
+            {% else %} 
+            <tr style="opacity: 0.5;">
+                <td>{{ company.name }}</td>
+                <td>
+                    <em>{{ company.description }}</em>
+                </td>
+                <td>
+                    <a href="{{ path('company_details', {'id': company.id}) }}">détails</a>
+                    <a href="{{ path('company_edit', {'id': company.id}) }}">éditer</a>
+                </td>
+            </tr>
+            {% endif %}
         {% else %}
             <tr>
                 <td colspan="4">aucune entreprise</td>
             </tr>
         {% endfor %}
+
         </tbody>
     </table>
 

@@ -45,18 +45,17 @@ class CompanyController extends AbstractController
         // Durée d'un créneau en minutes (par exemple 15)
         $slotsDuration = getenv('SLOTS_DURATION');
 
-        // TODO: Générer les créneaux libres et les associer aux entreprises
-
+        // Converted to seconds
         $slotsStartSecond = $this->convertToSecond($slotsStart);
         $slotsEndSecond = $this->convertToSecond($slotsEnd);
         $slotsDurationSecond = $slotsDuration * 60;
+
         $slotsQuantity = ( $slotsEndSecond - $slotsStartSecond ) / $slotsDurationSecond;
 
         for ($i = 0; $i < $slotsQuantity; $i++) {
+
             $slot = new Slot();
-           
             $slot->setTime( $this->convertToString($slotsStartSecond) );
-            
             $company->addSlot($slot);
 
             $entityManager = $this->getDoctrine()->getManager();
@@ -94,10 +93,8 @@ class CompanyController extends AbstractController
         $trainingOptions = $this->getTrainingsOptions();
 
         $form = $this->createForm(CompanyType::class, $company);
-
-        
+        // Add training checkboxes
         $this->buildTrainingForm($trainingOptions, $form);
-
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -158,7 +155,11 @@ class CompanyController extends AbstractController
     {
         $this->denyAccessUnlessGranted("ROLE_ADMIN");
 
+        $trainingOptions = $this->getTrainingsOptions();    
+
         $form = $this->createForm(CompanyType::class, $company);
+        // Add training checkboxes
+        $this->buildTrainingForm($trainingOptions, $form);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

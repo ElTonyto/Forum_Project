@@ -132,6 +132,14 @@ class Company
         return $this->trainings;
     }
 
+    /**
+     * @return Collection|Training[]
+     */
+    public function gettrainings(): Collection
+    {
+        return $this->trainings;
+    }
+
     public function addTraining(Training $training): self
     {
         if (!$this->trainings->contains($training)) {
