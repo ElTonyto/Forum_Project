@@ -34,18 +34,31 @@
 		{% for slot in company.slots %}
 			{# if slot is free #}
 			{% if slot.student == null %}
-			<a class="col-sm-2 bg-success slot m-1 text-white"
-			onclick="window.location.href = {{ path('addUserToSlot', {'userId': app.user.id , 'slotId': slot.id}) }}">
-				<div>
-					{{ slot.time }}
-				</div>
-			</a>
-			
-			{# if slot is not free #}
+				<a class="col-sm-2 bg-success slot m-1 text-white" onclick="window.location.href = {{ path('addUserToSlot', {'userId': app.user.id , 'slotId': slot.id}) }}">
+					<div>
+						{{ slot.time }}
+					</div>
+				</a>
+
+				{# if slot is not free #}
 			{% elseif slot.student != null %}
-			<div class="col-sm-2 bg-danger slot m-1 text-white">
-				{{ slot.time }}
-			</div>
+				{% if is_granted('ROLE_ADMIN') %}
+					<div class="col-sm-2 bg-danger slot m-1 text-white">
+						{{ slot.time }}
+						{{slot.student.name}}
+					</div>
+					{# if the connected user is the slot student #}
+				{% elseif slot.student.id == app.user.id %}
+					<div class="col-sm-2 bg-info slot m-1 text-white">
+						{{ slot.time }}
+						{{slot.student.name}}
+					</div>
+				{% else %}
+					<div class="col-sm-2 bg-danger slot m-1 text-white">
+						{{ slot.time }}
+					</div>
+				{% endif %}
+
 			{% endif %}
 		{% endfor %}
 	</div>
