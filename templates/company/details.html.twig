@@ -71,4 +71,6 @@
 
 <a href="{{ path('company_index') }}">&laquo; retour à la liste</a>
 
-{{ include('company/_delete_form.html.twig') }}{% endblock %}
+{% if is_granted('ROLE_ADMIN') %}
+	{{ include('company/_delete_form.html.twig') }}
+{% endif %}{% endblock %}
