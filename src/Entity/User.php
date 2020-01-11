@@ -176,7 +176,6 @@ class User implements UserInterface
             $this->slots[] = $slot;
             $slot->setStudent($this);
         }
-
         return $this;
     }
 

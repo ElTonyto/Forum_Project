@@ -8,6 +8,7 @@ use App\Entity\Slot;
 use App\Entity\Training;
 use App\Form\CompanyType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
 use App\Repository\CompanyRepository;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -193,13 +194,18 @@ class CompanyController extends AbstractController
 
     // Function to make the reservation of a free slot
      /**
-     * @Route("/{userId}/{slotId}/add", name="addUserToSlot", methods={"GET","POST"})
+     * @Route("/{iduser}/{idslot}/add", name="slot_reservation", methods={"GET","POST"})
+     * 
+     * @ParamConverter("user", options={"mapping": {"iduser" : "id"}})
+     * @ParamConverter("slot", options={"mapping": {"idslot"   : "id"}})
      */
-    public function addUserToSlot(int $userId, Slot $slot)
+    public function slotReservation(User $user, Slot $slot): Response
     {
-        if(is_null($slot->getStudent)){
-            $slot->setStudent($userId);
-            $entityManager->persist($slot);
+        if(is_null($slot->getStudent())){
+            $user->addSlot($slot);
+
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($user);
             $this->getDoctrine()->getManager()->flush();
         }
         return $this->redirectToRoute('company_index');
