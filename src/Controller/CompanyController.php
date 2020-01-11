@@ -72,7 +72,7 @@ class CompanyController extends AbstractController
         $hours = floor($seconds / 3600);
         $minutes = floor(($seconds / 60) % 60);
 
-        if( $minutes === 0){
+        if( $minutes == 0){
             return "$hours:$minutes"."0";
         }
         return "$hours:$minutes";
