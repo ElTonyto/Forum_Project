@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Company;
+use App\Entity\User;
 use App\Entity\Slot;
 use App\Entity\Training;
 use App\Form\CompanyType;
@@ -187,6 +188,20 @@ class CompanyController extends AbstractController
             $entityManager->flush();
         }
 
+        return $this->redirectToRoute('company_index');
+    }
+
+    // Function to make the reservation of a free slot
+     /**
+     * @Route("/{userId}/{slotId}/add", name="addUserToSlot", methods={"GET","POST"})
+     */
+    public function addUserToSlot(int $userId, Slot $slot)
+    {
+        if(is_null($slot->getStudent)){
+            $slot->setStudent($userId);
+            $entityManager->persist($slot);
+            $this->getDoctrine()->getManager()->flush();
+        }
         return $this->redirectToRoute('company_index');
     }
 }

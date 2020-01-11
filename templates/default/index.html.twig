@@ -1,15 +1,35 @@
 {% extends 'base.html.twig' %}
 
 {% block subtitle %}
-20 Novembre 2020<br/>14h &rarr; 18h
+	20 Novembre 2020<br/>14h &rarr; 18h
 {% endblock %}
 
 {% block body %}
-<h2 class="post-title">
-    Organisez votre visite!
-</h2>
-<h3 class="post-subtitle">
-    A l'aide de cette plateforme, organisez votre visite à l'événement, consultez les
-    entreprises qui seront présentes, et réservez des créneaux pour les rencontrer!
-</h3>
+	<h2 class="post-title">
+		Organisez votre visite!
+	</h2>
+	<h3 class="post-subtitle">
+		A l'aide de cette plateforme, organisez votre visite à l'événement, consultez les
+								    entreprises qui seront présentes, et réservez des créneaux pour les rencontrer!
+	</h3>
+
+	{% if app.user %}
+		<hr>
+		<h2 class="post-title">
+			Vos rendez-vous
+		</h2>
+		{% if not app.user.slots is empty %}
+			<ul>
+				{% for slot in app.user.slots %}
+					<li>{{ slot.time }}
+						-
+						{{ slot.company.name }}</li>
+				{% endfor %}
+			</ul>
+		{% else %}
+			<p>Vous n'avez pas réservé de crénau</p>
+		{% endif %}
+	{% endif %}
+
+
 {% endblock %}
