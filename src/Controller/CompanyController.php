@@ -39,7 +39,7 @@ class CompanyController extends AbstractController
     public function createSlots(Company $company)
     {
         // Récupération des paramètres des créneaux (voir .env)
-        
+
         // Début et fin d'un créneau (par ex: 14:00 et 16:45)
         $slotsStart = getenv('SLOTS_START');
         $slotsEnd = getenv('SLOTS_END');
@@ -52,38 +52,39 @@ class CompanyController extends AbstractController
         $slotsEndSecond = $this->convertToSecond($slotsEnd);
         $slotsDurationSecond = $slotsDuration * 60;
 
-        $slotsQuantity = ( $slotsEndSecond - $slotsStartSecond ) / $slotsDurationSecond;
+        $slotsQuantity = ($slotsEndSecond - $slotsStartSecond) / $slotsDurationSecond;
 
         for ($i = 0; $i < $slotsQuantity; $i++) {
 
             $slot = new Slot();
-            $slot->setTime( $this->convertToString($slotsStartSecond) );
+            $slot->setTime($this->convertToString($slotsStartSecond));
             $company->addSlot($slot);
 
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($slot);
             $entityManager->flush();
 
-            $slotsStartSecond += $slotsDurationSecond; 
+            $slotsStartSecond += $slotsDurationSecond;
         }
     }
 
     // Converts seconds to HH:MM format
-    public function convertToString($seconds) {
+    public function convertToString($seconds)
+    {
         $hours = floor($seconds / 3600);
         $minutes = floor(($seconds / 60) % 60);
 
-        if( $minutes == 0){
-            return "$hours:$minutes"."0";
+        if ($minutes == 0) {
+            return "$hours:$minutes" . "0";
         }
         return "$hours:$minutes";
-        
     }
 
     // Convert string format HH:MM to seconds
-    public function convertToSecond($time){
+    public function convertToSecond($time)
+    {
         list($h, $m) = explode(':', $time);
-	    return ($h * 3600) + ($m * 60);
+        return ($h * 3600) + ($m * 60);
     }
 
     /**
@@ -115,7 +116,8 @@ class CompanyController extends AbstractController
     }
 
     // Generates the training checkboxes for the form
-    public function buildTrainingForm ( ArrayCollection $options, $form ) {
+    public function buildTrainingForm(ArrayCollection $options, $form)
+    {
         $form->add('training', EntityType::class, [
             'class' => Training::class,
             'choice_label' => 'name',
@@ -126,7 +128,8 @@ class CompanyController extends AbstractController
     }
 
     // Gets all the training options
-    public function getTrainingsOptions(){
+    public function getTrainingsOptions()
+    {
 
         // Picks all the elements in Training
         $entityManager = $this->getDoctrine()->getManager();
@@ -134,7 +137,7 @@ class CompanyController extends AbstractController
 
         // Add it to options
         $options = new ArrayCollection();
-        foreach($trainings as $training){
+        foreach ($trainings as $training) {
             $options->set($training->getName(), $training);
         }
         return $options;
@@ -157,7 +160,7 @@ class CompanyController extends AbstractController
     {
         $this->denyAccessUnlessGranted("ROLE_ADMIN");
 
-        $trainingOptions = $this->getTrainingsOptions();    
+        $trainingOptions = $this->getTrainingsOptions();
 
         $form = $this->createForm(CompanyType::class, $company);
         // Add training checkboxes
@@ -183,7 +186,7 @@ class CompanyController extends AbstractController
     {
         $this->denyAccessUnlessGranted("ROLE_ADMIN");
 
-        if ($this->isCsrfTokenValid('delete'.$company->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $company->getId(), $request->request->get('_token'))) {
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->remove($company);
             $entityManager->flush();
@@ -193,21 +196,58 @@ class CompanyController extends AbstractController
     }
 
     // Function to make the reservation of a free slot
-     /**
-     * @Route("/{iduser}/{idslot}/add", name="slot_reservation", methods={"GET","POST"})
+    /**
+     * @Route("/{iduser}/{idcompany}/{idslot}/add", name="slot_reservation", methods={"GET","POST"})
      * 
      * @ParamConverter("user", options={"mapping": {"iduser" : "id"}})
-     * @ParamConverter("slot", options={"mapping": {"idslot"   : "id"}})
+     * @ParamConverter("slot", options={"mapping": {"idslot" : "id"}})
+     * @ParamConverter("company", options={"mapping": {"idcompany" : "id"}})
      */
-    public function slotReservation(User $user, Slot $slot): Response
+    public function slotReservation(User $user, Company $company, Slot $slot): Response
     {
-        if(is_null($slot->getStudent())){
-            $user->addSlot($slot);
+        if (is_null($slot->getStudent())) {
+            if ($this->isTimeTaken($user, $slot)) {
+                return $this->redirectToRoute('company_details', [
+                    "id" => $company->getId(),
+                ]);
+            } elseif ($this->isCompanyTaken($user, $slot)) {
+                return $this->redirectToRoute('company_details', [
+                    "id" => $company->getId(),
+                ]);
+            } else {
+                $user->addSlot($slot);
 
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($user);
-            $this->getDoctrine()->getManager()->flush();
+                $entityManager = $this->getDoctrine()->getManager();
+                $entityManager->persist($user);
+                $this->getDoctrine()->getManager()->flush();
+            }
         }
-        return $this->redirectToRoute('company_index');
+        return $this->redirectToRoute('company_details', [
+            "id" => $company->getId(),
+        ]);
+    }
+
+    // True is the user already has a encounter at this time
+    public function isTimeTaken(User $user, Slot $slot)
+    {
+        $isTimeTaken = false;
+        foreach ($user->getSlots() as $userSlot) {
+            if ($userSlot->getTime() === $slot->getTime()) {
+                $isTimeTaken = true;
+            }
+        }
+        return $isTimeTaken;
+    }
+
+    // True if the user has already seen the company
+    public function isCompanyTaken(User $user, Slot $slot)
+    {
+        $isCompanyTaken = false;
+        foreach ($user->getSlots() as $userSlot) {
+            if ($userSlot->getCompany() === $slot->getCompany()) {
+                $isCompanyTaken = true;
+            }
+        }
+        return $isCompanyTaken;
     }
 }

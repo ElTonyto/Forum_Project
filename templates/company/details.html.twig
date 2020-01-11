@@ -35,7 +35,7 @@
 			{# if slot is free #}
 			{% if slot.student == null %}
 				<a class="col-sm-2 bg-success slot m-1 text-white" 
-				onclick="window.location.href = '{{ path("slot_reservation", {'iduser': app.user.id , 'idslot': slot.id}) }}';">
+				onclick="window.location.href = '{{ path("slot_reservation", {'iduser': app.user.id , 'idcompany': company.id ,'idslot': slot.id}) }}';">
 					<div>
 						{{ slot.time }}
 					</div>
